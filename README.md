@@ -1,9 +1,15 @@
 # test-otel-app
 
-## Server
+## Setup
 
-Run it:
+```sh
+yarn install
+```
+
+## Run it
 
 ```
-SENTRY_DSN=xxxx cd packages/server && yarn start
+SENTRY_DSN=xxxx yarn run-node
+SENTRY_DSN=xxxx yarn run-otel
+SENTRY_DSN=xxxx yarn run-otel-esm
 ```

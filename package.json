@@ -1,10 +1,18 @@
 {
     "private": true,
     "workspaces": [
-        "packages/server"
+        "packages/core",
+        "packages/server-otel",
+        "packages/server-otel-esm",
+        "packages/server-node"
     ],
+    "scripts": {
+        "run-node": "cd packages/server-node && yarn start",
+        "run-otel": "cd packages/server-otel && yarn start",
+        "run-otel-esm": "cd packages/server-otel-esm && yarn start"
+    },
     "volta": {
         "node": "16.18.0",
         "yarn": "1.22.19"
-      }
+    }
 }

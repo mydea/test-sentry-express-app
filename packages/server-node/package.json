@@ -1,0 +1,14 @@
+{
+  "name": "@test-express-app/node",
+  "version": "0.0.0",
+  "scripts": {
+    "start": "node ./app.js"
+  },
+  "dependencies": {
+    "@sentry/node": "latest",
+    "@test-express-app/core": "*"
+  },
+  "volta": {
+    "extends": "../../package.json"
+  }
+}
