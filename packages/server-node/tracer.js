@@ -1,8 +1,12 @@
 const Sentry = require("@sentry/node");
-  
+const { ProfilingIntegration } = require("@sentry/profiling-node");
+
 Sentry.init({
   dsn: process.env.SENTRY_DSN,
   debug: true,
   tracesSampleRate: 1,
-  debug: true,
+  profilesSampleRate: 1,
+  integrations: [
+    new ProfilingIntegration(),
+  ]
 });

@@ -6,6 +6,7 @@
   },
   "dependencies": {
     "@sentry/node": "latest",
+    "@sentry/profiling-node": "latest",
     "@test-express-app/core": "*"
   },
   "volta": {

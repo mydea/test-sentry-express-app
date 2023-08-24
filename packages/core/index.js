@@ -39,6 +39,28 @@ function runApp(Sentry, callback) {
       scope.setUser({id: `user-${id}`, email: 'test@example.com' });
       console.log('outer scope', scope._tags)
 
+      makeRequest(`http://example.com/${id}`).then(() => {
+        Sentry.withScope((innerScope) => {
+          innerScope.setTag("parallel-inner", `${id}`);
+          innerScope.setTag(`parallel-inner-${id}`, `${id}`);
+
+          console.log("inner scope", innerScope._tags);
+
+          reply.send({ hello: "world", status: 'OK', id });
+        })
+      });
+    });
+  });
+
+  app.get("/parallel-error", (request, reply) => {
+    const id = Math.floor(Math.random() * 1000000);
+    console.log(`parallel request ${id}`);
+
+    Sentry.withScope((scope) => {
+      scope.setTag("parallel-outer", `${id}`);
+      scope.setUser({id: `user-${id}`, email: 'test@example.com' });
+      console.log('outer scope', scope._tags)
+
       setTimeout(() => {
         makeRequest(`http://example.com/${id}`).then(() => {
           Sentry.withScope((innerScope) => {
@@ -48,6 +70,30 @@ function runApp(Sentry, callback) {
             console.log("inner scope", innerScope._tags);
 
             Sentry.captureException(new Error(`parallel error ${id}`));
+            reply.send({ hello: "world", status: 'OK', id });
+          })
+        })
+      }, 5000);
+    });
+  });
+
+  app.get("/parallel-timeout", (request, reply) => {
+    const id = Math.floor(Math.random() * 1000000);
+    console.log(`parallel request ${id}`);
+
+    Sentry.withScope((scope) => {
+      scope.setTag("parallel-outer", `${id}`);
+      scope.setUser({id: `user-${id}`, email: 'test@example.com' });
+      console.log('outer scope', scope._tags)
+
+      setTimeout(() => {
+        makeRequest(`http://example.com/${id}`).then(() => {
+          Sentry.withScope((innerScope) => {
+            innerScope.setTag("parallel-inner", `${id}`);
+            innerScope.setTag(`parallel-inner-${id}`, `${id}`);
+
+            console.log("inner scope", innerScope._tags);
+
             reply.send({ hello: "world", status: 'OK', id });
           })
         })
