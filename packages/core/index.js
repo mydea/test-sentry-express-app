@@ -50,7 +50,7 @@ function runApp(Sentry, callback) {
         })
       });
     });
-  });
+});
 
   app.get("/parallel-error", (request, reply) => {
     const id = Math.floor(Math.random() * 1000000);
@@ -114,8 +114,63 @@ function runApp(Sentry, callback) {
     res.send({ other: 123 });
   });
 
+  app.get("/test-mysql",async  function (req, res) {
+    const mysql = require('mysql');
+    const connection =  mysql.createConnection({
+      host: 'localhost',
+      user: 'root',
+      database: 'test-app',
+      password: 'password'
+    });
+
+    const movies = [];
+    for(let i = 1; i <= 50; i++) {
+      const rows = await new Promise((resolve, reject) => {
+        connection.query(
+          'SELECT * FROM `movies` WHERE `title` = ?',
+          [`Joker${i}`],
+          function (error, results, fields) {
+            if (error) {
+              return reject(error);
+            }
+
+            resolve(results);
+          }
+        );
+      });
+
+
+      movies.push(...rows);
+    }
+
+    connection.end();
+
+    res.send({ movies });
+  });
+
+  app.get("/test-nested",async  function (req, res) {
+    for(let i = 0; i < 10; i++) {
+      await makeRequest(`http://localhost:3000/test-param/${i}`);
+    }
+
+    res.send({ completed: 'all' });
+  });
+
+
   app.get("/test-param/:param", function (req, res) {
     res.send({ paramWas: req.params.param });
+  });
+
+  app.get('/test-manual-instrumentation', function (req, res)  {
+    Sentry.startActiveSpan({description: 'test-manual-instrumentation'}, async () => {
+      const span = Sentry.startSpan({description: 'test-manual-instrumentation-2'});
+      await makeRequest(`http://localhost:3000/test-param/0`);
+      span.finish();
+
+      const span2 = Sentry.startSpan({description: 'test-manual-instrumentation-3'});
+      span2.finish();
+      res.send({ finished: 'all' });
+    });
   });
 
   app.listen(port, () => {

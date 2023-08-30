@@ -4,7 +4,8 @@
   "main": "index.js",
   "scripts": {},
   "dependencies": {
-    "express": "~4.18.2"
+    "express": "~4.18.2",
+    "mysql": "^2.18.1"
   },
   "volta": {
     "extends": "../../package.json"

@@ -7,6 +7,7 @@ Sentry.init({
   tracesSampleRate: 1,
   profilesSampleRate: 1,
   integrations: [
+    ...Sentry.autoDiscoverNodePerformanceMonitoringIntegrations(),
     new ProfilingIntegration(),
   ]
 });
