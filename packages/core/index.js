@@ -1,5 +1,6 @@
 const http = require('http');
 const express = require("express");
+const mysql = require('mysql');
 
 function runApp(Sentry, callback) { 
   const app = express();
@@ -115,7 +116,6 @@ function runApp(Sentry, callback) {
   });
 
   app.get("/test-mysql",async  function (req, res) {
-    const mysql = require('mysql');
     const connection =  mysql.createConnection({
       host: 'localhost',
       user: 'root',
@@ -123,25 +123,27 @@ function runApp(Sentry, callback) {
       password: 'password'
     });
 
-    const movies = [];
-    for(let i = 1; i <= 50; i++) {
-      const rows = await new Promise((resolve, reject) => {
-        connection.query(
-          'SELECT * FROM `movies` WHERE `title` = ?',
-          [`Joker${i}`],
-          function (error, results, fields) {
-            if (error) {
-              return reject(error);
-            }
-
-            resolve(results);
+    const sortedMovies = await new Promise((resolve, reject) => {
+      connection.query(
+        'SELECT title FROM `movies` ORDER BY title asc',
+        function (error, results) {
+          if (error) {
+            return reject(error);
           }
-        );
-      });
 
+          resolve(results);
+        }
+      );
+    });
 
-      movies.push(...rows);
+    const moveTitles = sortedMovies.map((movie) => movie.title);
+
+    const movies = [];
+
+    for (const title of moveTitles) {
+      movies.push(...(await getMovies(connection, title)));
     }
+
 
     connection.end();
 
@@ -155,7 +157,6 @@ function runApp(Sentry, callback) {
 
     res.send({ completed: 'all' });
   });
-
 
   app.get("/test-param/:param", function (req, res) {
     res.send({ paramWas: req.params.param });
@@ -178,6 +179,23 @@ function runApp(Sentry, callback) {
   });
 
   return app;
+}
+
+function getMovies(connection, title) {
+  return new Promise((resolve, reject) => {
+    connection.query(
+      'SELECT *, SLEEP(0.1) FROM `movies` WHERE `title` = ?',
+      [title],
+      function (error, results) {
+        if (error) {
+          console.error(error);
+          return reject(error);
+        }
+
+        resolve(results);
+      }
+    );
+  });
 }
 
 module.exports = { runApp };
